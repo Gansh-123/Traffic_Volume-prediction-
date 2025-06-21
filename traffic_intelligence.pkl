@@ -1,0 +1,68 @@
+#importing Modules
+
+import pandas as pd
+import numpy as np
+import warnings
+warnings.filterwarnings("ignore")
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.model_selection import train_test_split
+df=pd.read_csv("/content/traffic volume.csv")
+df.drop("holiday",axis=1,inplace=True)
+
+#Droping null values 
+df.dropna(subset=["temp","rain","snow","weather"],axis=0, inplace=True)
+df=df.drop(["snow","rain"],axis=1)
+print(df.isnull().sum())
+print(df.describe())
+print(df.info())
+
+#Extract date & year & month
+df["year"]=pd.to_datetime(df["date"],format="%d-%m-%Y").dt.year
+df["Date"]=pd.to_datetime(df["date"],format="%d-%m-%Y").dt.day
+df["Month"]=pd.to_datetime(df["date"],format="%d-%m-%Y").dt.month
+df_coded=pd.get_dummies(df["weather"]).astype(int)
+df["Time"]=pd.to_datetime(df["Time"],format="%H:%M:%S").dt.hour
+df=pd.concat([df,df_coded],axis=1)
+df.drop("weather",axis=1, inplace=True)
+df.drop("date",axis=1, inplace=True)
+x=df.drop("traffic_volume",axis=1)
+y=df["traffic_volume"]
+
+#LinearRegression Model
+from sklearn.linear_model import LinearRegression
+model=LinearRegression()
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.3,random_state=45)
+model.fit(x_train,y_train)
+y_pred=model.predict(x_test)
+from sklearn.metrics import r2_score
+Accuracy1=r2_score(y_test,y_pred)
+print("The accuracy of LinearRegression is : ", Accuracy1*100)
+
+#DecisionTreeRegressor Model
+from sklearn.tree import DecisionTreeRegressor
+Model_tree=DecisionTreeRegressor(random_state=45,max_depth=5,min_samples_leaf=3)
+Model_tree.fit(x_train,y_train)
+y_value=Model_tree.predict(x_test)
+acc=r2_score(y_value,y_test)
+print("The accuracy of DecisionTree is : ",acc*100)
+
+#RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor
+Random_model=RandomForestRegressor(n_estimators=20,random_state=56)
+Random_model.fit(x_train,y_train)
+y_value=Random_model.predict(x_test)
+
+#Checking accuracy 
+accuracy=r2_score(y_test,y_value)
+df.to_csv("Updated.csv")
+print("The accuracy of RandomForestRegressor is : ", accuracy*100)
+
+#Saving in a file
+import pickle
+with open("Traffic_intelligence.pkl","wb") as fp:
+    pickle.dump(Random_model,fp)
+y_predict=Random_model.predict(np.array([[290,14,2025,30,11,0,1,0,0,0,1,1,1,1,0,0]]))
+for i in y_predict:
+    print("The traffic volume is :" ,i)
+    if(i>1000):
+        print("The traffic is to high....")
