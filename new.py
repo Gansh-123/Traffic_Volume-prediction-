@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pickle
 import gzip
+import sklearn
 with gzip.open("model.pkl.gz","rb") as fp:
     model=pickle.load(fp)
 def model_prediction(temp,time,year,date,month,Clear,Clouds,Drizzle,Fog,Haze,Mist,Rain,Smoke,Snow,Squall,Thunderstorm):
