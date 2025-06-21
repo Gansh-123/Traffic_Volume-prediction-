@@ -1,7 +1,8 @@
 import streamlit as st
 import numpy as np
 import pickle
-with open("traffic_intelligence.pkl","rb") as fp:
+import gzip
+with gzip.open("model.pkl.gz","rb") as fp:
     model=pickle.load(fp)
 def model_prediction(temp,time,year,date,month,Clear,Clouds,Drizzle,Fog,Haze,Mist,Rain,Smoke,Snow,Squall,Thunderstorm):
     model_value=model.predict(np.array([[temp,time,year,date,month,Clear,Clouds,Drizzle,Fog,Haze,Mist,Rain,Smoke,Snow,Squall,Thunderstorm]]))
